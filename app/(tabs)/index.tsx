@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CalculatorHeader from '@/components/CalculatorHeader';
 import TableHeader from '@/components/TableHeader';
 import BeverageRow from '@/components/BeverageRow';
 import CalculatorSummary from '@/components/CalculatorSummary';
 import { BeverageItem } from '@/types/beverage';
+import { BLEPrinter } from 'react-native-thermal-receipt-printer-image-qr';
 
 export default function BeverageCalculator() {
   const [items, setItems] = useState<BeverageItem[]>([
@@ -70,6 +71,22 @@ export default function BeverageCalculator() {
 
   const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
 
+  // Print handler
+  const handlePrint = useCallback(() => {
+    try {
+      let printText = 'Beverage List\n';
+      printText += '-----------------------------\n';
+      items.forEach((item) => {
+        printText += `${item.name}  x${item.cases}  ${item.price}  = ${item.total}\n`;
+      });
+      printText += '-----------------------------\n';
+      printText += `Grand Total: PHP ${grandTotal.toFixed(2)}\n`;
+      BLEPrinter.printText(printText, {});
+    } catch (e) {
+      Alert.alert('Print Error', String(e) || 'Failed to print');
+    }
+  }, [items, grandTotal]);
+
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <CalculatorHeader />
@@ -95,6 +112,7 @@ export default function BeverageCalculator() {
         grandTotal={grandTotal}
         onAddItem={addItem}
         onClearAll={clearAll}
+        onPrint={handlePrint}
       />
     </SafeAreaView>
   );

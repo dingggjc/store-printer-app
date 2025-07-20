@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Calculator, Info } from 'lucide-react-native';
+import { Calculator, Info, Printer } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
@@ -35,6 +35,15 @@ export default function TabLayout() {
         options={{
           title: 'About',
           tabBarIcon: ({ size, color }) => <Info size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="devices"
+        options={{
+          title: 'Devices',
+          tabBarIcon: ({ size, color }) => (
+            <Printer size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

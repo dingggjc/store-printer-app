@@ -27,7 +27,14 @@
       }
     },
     "android": {
-      "package": "com.dingggjc.TitaApp"
+      "package": "com.dingggjc.TitaApp",
+      "permissions": [
+        "BLUETOOTH",
+        "BLUETOOTH_ADMIN",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH_CONNECT",
+        "ACCESS_FINE_LOCATION"
+      ]
     }
   }
 }
