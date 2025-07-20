@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert, ToastAndroid, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CalculatorHeader from '@/components/CalculatorHeader';
 import TableHeader from '@/components/TableHeader';
@@ -10,9 +10,7 @@ import { BLEPrinter } from 'react-native-thermal-receipt-printer-image-qr';
 
 export default function BeverageCalculator() {
   const [items, setItems] = useState<BeverageItem[]>([
-    { id: '1', name: 'Coke', price: 0, cases: 0, total: 0 },
-    { id: '2', name: 'Sprite', price: 0, cases: 0, total: 0 },
-    { id: '3', name: 'Pepsi', price: 0, cases: 0, total: 0 },
+    { id: '1', name: 'Coke', price: 0, cases: 1, total: 0 },
   ]);
 
   const calculateTotal = useCallback((price: number, cases: number): number => {
@@ -48,7 +46,7 @@ export default function BeverageCalculator() {
       id: newId,
       name: `Item ${items.length + 1}`,
       price: 0,
-      cases: 0,
+      cases: 1,
       total: 0,
     };
     setItems((currentItems) => [...currentItems, newItem]);
@@ -74,25 +72,68 @@ export default function BeverageCalculator() {
   // Print handler
   const handlePrint = useCallback(() => {
     try {
-      let printText = 'Beverage List\n';
-      printText += '-----------------------------\n';
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+        now.getDate()
+      )}`;
+      let hour = now.getHours();
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12;
+      if (hour === 0) hour = 12;
+      const timeStr = `${pad(hour)}:${pad(now.getMinutes())}:${pad(
+        now.getSeconds()
+      )} ${ampm}`;
+
+      // Calculate subtotal and grand total
+      const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+
+      // Header
+      let printText = '';
+      printText += '   Love Joy Grace Store\n';
+      printText += '    BEVERAGE RECEIPT\n';
+      printText += ` ${dateStr}  ${timeStr}\n\n`;
+      printText += '------------------------------\n';
+      printText += 'Item      Qty  Price   Total\n';
+      printText += '------------------------------\n';
+
+      // Items
       items.forEach((item) => {
-        printText += `${item.name}  x${item.cases}  ${item.price}  = ${item.total}\n`;
+        const name = (item.name || '').padEnd(9).slice(0, 9);
+        const qty = ('x' + item.cases).padEnd(4).slice(0, 4);
+        const price = item.price.toFixed(2).padStart(7).slice(-7);
+        const total = item.total.toFixed(2).padStart(7).slice(-7);
+        printText += `${name} ${qty} ${price} ${total}\n`;
       });
-      printText += '-----------------------------\n';
-      printText += `Grand Total: PHP ${grandTotal.toFixed(2)}\n`;
+      printText += '------------------------------\n';
+      printText += `GRAND TOTAL:${''.padStart(7)}PHP ${grandTotal.toFixed(
+        2
+      )}\n`;
+      printText += '------------------------------\n\n';
+      printText += '  Thank you for your purchase!\n';
+      printText += 'Please come again. Stay hydrated!\n';
+      printText += '\n\n\n\n\n'; // Extra spacing at the bottom
+
       BLEPrinter.printText(printText, {});
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Receipt sent to printer!', ToastAndroid.SHORT);
+      } else {
+        Alert.alert('Printed', 'Receipt sent to printer!');
+      }
     } catch (e) {
       Alert.alert('Print Error', String(e) || 'Failed to print');
     }
-  }, [items, grandTotal]);
+  }, [items]);
+
+  // Only enable print if at least one item has a total > 0
+  const canPrint = items.some((item) => item.total > 0);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       <CalculatorHeader />
 
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-        <View className="bg-white rounded-xl my-4 shadow-md shadow-black/10 overflow-hidden">
+        <View className="bg-white rounded-2xl my-6 shadow-lg shadow-black/10 overflow-hidden border border-gray-200">
           <TableHeader />
 
           {items.map((item, index) => (
@@ -108,12 +149,14 @@ export default function BeverageCalculator() {
         </View>
       </ScrollView>
 
-      <CalculatorSummary
-        grandTotal={grandTotal}
-        onAddItem={addItem}
-        onClearAll={clearAll}
-        onPrint={handlePrint}
-      />
+      <View className="px-4 pb-4">
+        <CalculatorSummary
+          grandTotal={grandTotal}
+          onAddItem={addItem}
+          onClearAll={clearAll}
+          onPrint={canPrint ? handlePrint : undefined}
+        />
+      </View>
     </SafeAreaView>
   );
 }

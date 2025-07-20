@@ -26,10 +26,10 @@ export default function CalculatorSummary({
         {/* Add Item Button */}
         <TouchableOpacity
           onPress={onAddItem}
-          className="flex-row items-center bg-blue-500 px-5 py-3 rounded-lg flex-[0.31] justify-center"
+          className="flex-row items-center bg-blue-500 px-3 py-2 rounded-lg flex-[0.31] justify-center"
         >
-          <Plus size={20} className="text-white" />
-          <Text className="text-white font-semibold text-base ml-2">
+          <Plus size={18} className="text-white" />
+          <Text className="text-white font-semibold text-sm ml-2">
             Add Item
           </Text>
         </TouchableOpacity>
@@ -38,20 +38,20 @@ export default function CalculatorSummary({
         {onPrint && (
           <TouchableOpacity
             onPress={onPrint}
-            className="flex-row items-center bg-emerald-500 px-5 py-3 rounded-lg flex-[0.31] justify-center"
+            className="flex-row items-center bg-emerald-500 px-3 py-2 rounded-lg flex-[0.31] justify-center"
           >
             {/* Printer icon can be added here if available */}
-            <Text className="text-white font-semibold text-base">Print</Text>
+            <Text className="text-white font-semibold text-sm">Print</Text>
           </TouchableOpacity>
         )}
 
         {/* Clear All Button */}
         <TouchableOpacity
           onPress={onClearAll}
-          className="flex-row items-center bg-gray-50 px-5 py-3 rounded-lg flex-[0.31] justify-center border border-gray-300"
+          className="flex-row items-center bg-gray-50 px-3 py-2 rounded-lg flex-[0.31] justify-center border border-gray-300"
         >
-          <RotateCcw size={20} className="text-gray-500" />
-          <Text className="text-gray-500 font-semibold text-base ml-2">
+          <RotateCcw size={18} className="text-gray-500" />
+          <Text className="text-gray-500 font-semibold text-sm ml-2">
             Clear All
           </Text>
         </TouchableOpacity>

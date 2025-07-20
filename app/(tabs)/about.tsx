@@ -1,16 +1,18 @@
 import React from 'react';
 import { View, Text, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Calculator, Heart } from 'lucide-react-native';
+import { Calculator, Info } from 'lucide-react-native';
 
-export default function About() {
+export default function Instructions() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="bg-white py-5 px-6 border-b border-gray-200">
         <View className="flex-row items-center">
-          <Calculator size={28} className="text-blue-500" />
-          <Text className="text-2xl font-bold text-gray-800 ml-3">About</Text>
+          <Info size={28} className="text-blue-500" />
+          <Text className="text-2xl font-bold text-gray-800 ml-3">
+            Instructions
+          </Text>
         </View>
       </View>
 
@@ -27,46 +29,33 @@ export default function About() {
           </View>
 
           {/* Title */}
-          <Text className="text-3xl font-bold text-gray-800 mb-2 text-center">
-            Inum-Inum Calculator
-          </Text>
-          <Text className="text-lg text-gray-500 mb-6 text-center">
-            Sayon ra ni bisag hubog ka
+          <Text className="text-3xl font-bold text-gray-800 mb-4 text-center">
+            How to Use This App
           </Text>
 
-          {/* Description */}
-          <Text className="text-base text-gray-600 text-center leading-6 mb-8">
-            Gikapoy na ka'g compute kung pila imong ginastos sa tanduay? Ayaw
-            kabalaka! Kini nga app motabang nimo kwenta pila na ka case imong
-            napalit — ug pila na pud ka bayad sa utang!
+          {/* Instructions */}
+          <Text className="text-base text-gray-600 text-left leading-7 mb-8">
+            1. <Text className="font-semibold">Calculator Tab:</Text>
+            {'\n'}- Enter the beverage name, price, and quantity (cases).{'\n'}-
+            Add more items with the "Add Item" button.{'\n'}- Remove items with
+            the delete button.{'\n'}- The total is calculated automatically.
+            {'\n'}- Press "Print" to print the receipt to your connected
+            printer.{'\n'}
+            {'\n'}
+            2. <Text className="font-semibold">Devices Tab:</Text>
+            {'\n'}- Make sure your Bluetooth printer is paired in your phone's
+            Bluetooth settings.{'\n'}- Use the "Refresh" button to scan for
+            paired printers.{'\n'}- Connect to a printer by tapping "Connect".
+            {'\n'}- Disconnect anytime with the "Disconnect" button.{'\n'}
+            {'\n'}
+            3. <Text className="font-semibold">Printing:</Text>
+            {'\n'}- Only one printer can be connected at a time.{'\n'}- The
+            printed receipt will show your beverage list and grand total.{'\n'}
+            {'\n'}
+            4. <Text className="font-semibold">Tips:</Text>
+            {'\n'}- Pair new printers in your phone's Bluetooth settings, not in
+            the app.{'\n'}- For best results, use 58mm thermal paper.{'\n'}
           </Text>
-
-          {/* Features */}
-          <View className="w-full mb-8">
-            <Text className="text-lg font-semibold text-gray-800 mb-4">
-              Mga Features (Feeling sosyal):
-            </Text>
-            <Text className="text-base text-gray-600 mb-2 leading-6">
-              • Pwede nimo i-add ug i-remove ang imong paliton
-            </Text>
-            <Text className="text-base text-gray-600 mb-2 leading-6">
-              • Real-time kwenta — walay libog
-            </Text>
-            <Text className="text-base text-gray-600 mb-2 leading-6">
-              • Simple kaayo — murag imong crush nga walay label
-            </Text>
-            <Text className="text-base text-gray-600 mb-2 leading-6">
-              • One-tap clear — para limpyohan imong kasaypanan
-            </Text>
-          </View>
-
-          {/* Footer */}
-          <View className="flex-row items-center pt-6 border-t border-gray-100">
-            <Heart size={16} className="text-red-500" />
-            <Text className="text-base text-gray-500 ml-2 font-medium">
-              Gibuhat ni Dingdong — certified gwapo 😎
-            </Text>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
