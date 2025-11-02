@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, ScrollView, Alert, ToastAndroid, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CalculatorHeader from '@/components/CalculatorHeader';
@@ -9,9 +9,7 @@ import { BeverageItem } from '@/types/beverage';
 import { BLEPrinter } from 'react-native-thermal-receipt-printer-image-qr';
 
 export default function BeverageCalculator() {
-  const [items, setItems] = useState<BeverageItem[]>([
-    { id: '1', name: 'Coke', price: 0, cases: 1, total: 0 },
-  ]);
+  const [items, setItems] = useState<BeverageItem[]>([]);
 
   const calculateTotal = useCallback((price: number, cases: number): number => {
     return price * cases;
@@ -21,19 +19,18 @@ export default function BeverageCalculator() {
     (id: string, field: keyof BeverageItem, value: string | number) => {
       setItems((currentItems) =>
         currentItems.map((item) => {
-          if (item.id === id) {
-            const updatedItem = { ...item, [field]: value };
+          if (item.id !== id) return item;
 
-            if (field === 'price' || field === 'cases') {
-              updatedItem.total = calculateTotal(
-                field === 'price' ? (value as number) : item.price,
-                field === 'cases' ? (value as number) : item.cases
-              );
-            }
+          const updatedItem = { ...item, [field]: value };
 
-            return updatedItem;
+          if (field === 'price' || field === 'cases') {
+            updatedItem.total = calculateTotal(
+              field === 'price' ? (value as number) : item.price,
+              field === 'cases' ? (value as number) : item.cases
+            );
           }
-          return item;
+
+          return updatedItem;
         })
       );
     },
@@ -44,89 +41,107 @@ export default function BeverageCalculator() {
     const newId = Date.now().toString();
     const newItem: BeverageItem = {
       id: newId,
-      name: `Item ${items.length + 1}`,
+      name: '',
       price: 0,
-      cases: 1,
+      cases: 0,
       total: 0,
     };
     setItems((currentItems) => [...currentItems, newItem]);
-  }, [items.length]);
+  }, []);
 
   const removeItem = useCallback((id: string) => {
     setItems((currentItems) => currentItems.filter((item) => item.id !== id));
   }, []);
 
   const clearAll = useCallback(() => {
-    setItems((currentItems) =>
-      currentItems.map((item) => ({
-        ...item,
-        price: 0,
-        cases: 0,
-        total: 0,
-      }))
-    );
+    setItems([]);
   }, []);
 
-  const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+  const grandTotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.total, 0),
+    [items]
+  );
 
-  // Print handler
-  const handlePrint = useCallback(() => {
+  const formatDateTime = useCallback(() => {
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+      now.getDate()
+    )}`;
+
+    let hour = now.getHours();
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+
+    const timeStr = `${pad(hour)}:${pad(now.getMinutes())}:${pad(
+      now.getSeconds()
+    )} ${ampm}`;
+
+    return { dateStr, timeStr };
+  }, []);
+
+  const formatCurrency = useCallback((amount: number): string => {
+    return amount.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }, []);
+
+  const generateReceiptText = useCallback(() => {
+    const { dateStr, timeStr } = formatDateTime();
+
+    let receipt = '';
+    receipt += '================================\n';
+    receipt += 'JOY LOVE CONSUMER GOODS TRADING\n';
+    receipt += '   non vat reg.TIN: 492517470\n';
+    receipt += '   09942954786-09917422036\n';
+    receipt += ' P8, Poblacion, Libona, Buk.\n';
+    receipt += '================================\n';
+    receipt += `Date: ${dateStr}\n`;
+    receipt += `Time: ${timeStr}\n`;
+    receipt += '================================\n\n';
+    receipt += 'ITEM           QTY   PRICE  TOTAL\n';
+    receipt += '--------------------------------\n';
+
+    items.forEach((item) => {
+      const name = (item.name || 'Unnamed').substring(0, 14).padEnd(14);
+      const qty = item.cases.toString().padStart(3);
+      const price = formatCurrency(item.price).padStart(8);
+      const total = formatCurrency(item.total).padStart(8);
+      receipt += `${name} ${qty} ${price} ${total}\n`;
+    });
+
+    receipt += '================================\n';
+    receipt += `GRAND TOTAL: ${formatCurrency(grandTotal).padStart(18)}\n`;
+    receipt += '================================\n\n';
+    receipt += '   Thank you for your purchase!\n';
+    receipt += '     Please come again!\n';
+    receipt += '\n\n\n\n';
+
+    return receipt;
+  }, [items, grandTotal, formatDateTime, formatCurrency]);
+
+  const handlePrint = useCallback(async () => {
     try {
-      const now = new Date();
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-        now.getDate()
-      )}`;
-      let hour = now.getHours();
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      hour = hour % 12;
-      if (hour === 0) hour = 12;
-      const timeStr = `${pad(hour)}:${pad(now.getMinutes())}:${pad(
-        now.getSeconds()
-      )} ${ampm}`;
+      const receiptText = generateReceiptText();
+      await BLEPrinter.printText(receiptText, {});
 
-      // Calculate subtotal and grand total
-      const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
-
-      // Header
-      let printText = '';
-      printText += '   Love Joy Grace Store\n';
-      printText += '    BEVERAGE RECEIPT\n';
-      printText += ` ${dateStr}  ${timeStr}\n\n`;
-      printText += '------------------------------\n';
-      printText += 'Item      Qty  Price   Total\n';
-      printText += '------------------------------\n';
-
-      // Items
-      items.forEach((item) => {
-        const name = (item.name || '').padEnd(9).slice(0, 9);
-        const qty = ('x' + item.cases).padEnd(4).slice(0, 4);
-        const price = item.price.toFixed(2).padStart(7).slice(-7);
-        const total = item.total.toFixed(2).padStart(7).slice(-7);
-        printText += `${name} ${qty} ${price} ${total}\n`;
-      });
-      printText += '------------------------------\n';
-      printText += `GRAND TOTAL:${''.padStart(7)}PHP ${grandTotal.toFixed(
-        2
-      )}\n`;
-      printText += '------------------------------\n\n';
-      printText += '  Thank you for your purchase!\n';
-      printText += 'Please come again. Stay hydrated!\n';
-      printText += '\n\n\n\n\n'; // Extra spacing at the bottom
-
-      BLEPrinter.printText(printText, {});
+      const message = 'Receipt sent to printer!';
       if (Platform.OS === 'android') {
-        ToastAndroid.show('Receipt sent to printer!', ToastAndroid.SHORT);
+        ToastAndroid.show(message, ToastAndroid.SHORT);
       } else {
-        Alert.alert('Printed', 'Receipt sent to printer!');
+        Alert.alert('Printed', message);
       }
-    } catch (e) {
-      Alert.alert('Print Error', String(e) || 'Failed to print');
+    } catch (error) {
+      Alert.alert(
+        'Print Error',
+        error instanceof Error ? error.message : 'Failed to print'
+      );
     }
-  }, [items]);
+  }, [generateReceiptText]);
 
-  // Only enable print if at least one item has a total > 0
-  const canPrint = items.some((item) => item.total > 0);
+  const canPrint = useMemo(() => items.some((item) => item.total > 0), [items]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">

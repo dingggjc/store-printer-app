@@ -6,7 +6,7 @@ interface CalculatorSummaryProps {
   grandTotal: number;
   onAddItem: () => void;
   onClearAll: () => void;
-  onPrint?: () => void; // Add optional onPrint prop
+  onPrint?: () => void;
 }
 
 export default function CalculatorSummary({
@@ -16,7 +16,10 @@ export default function CalculatorSummary({
   onPrint,
 }: CalculatorSummaryProps) {
   const formatCurrency = (value: number) => {
-    return `₱${value.toFixed(2)}`;
+    return `₱${value.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   return (

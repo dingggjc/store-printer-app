@@ -23,7 +23,10 @@ export default function BeverageRow({
   canRemove,
 }: BeverageRowProps) {
   const formatCurrency = (value: number) => {
-    return `₱${value.toFixed(2)}`;
+    return `₱${value.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   return (
