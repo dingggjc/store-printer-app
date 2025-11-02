@@ -94,7 +94,7 @@ export default function BeverageCalculator() {
     let receipt = '';
     receipt += '================================\n';
     receipt += 'JOY LOVE CONSUMER GOODS TRADING\n';
-    receipt += '   non vat reg.TIN: 492517470\n';
+    receipt += '   Non-VAT Reg. TIN: 492517470\n';
     receipt += '   09942954786-09917422036\n';
     receipt += ' P8, Poblacion, Libona, Buk.\n';
     receipt += '================================\n';
