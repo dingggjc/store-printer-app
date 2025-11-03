@@ -101,14 +101,15 @@ export default function BeverageCalculator() {
     receipt += `Date: ${dateStr}\n`;
     receipt += `Time: ${timeStr}\n`;
     receipt += '================================\n\n';
-    receipt += 'ITEM           QTY   PRICE  TOTAL\n';
+
+    receipt += 'ITEM         QTY   PRICE    TOTAL\n';
     receipt += '--------------------------------\n';
 
     items.forEach((item) => {
-      const name = (item.name || 'Unnamed').substring(0, 14).padEnd(14);
+      const name = (item.name || 'Unnamed').substring(0, 12).padEnd(12);
       const qty = item.cases.toString().padStart(3);
-      const price = formatCurrency(item.price).padStart(8);
-      const total = formatCurrency(item.total).padStart(8);
+      const price = formatCurrency(item.price).padStart(6);
+      const total = formatCurrency(item.total).padStart(10);
       receipt += `${name} ${qty} ${price} ${total}\n`;
     });
 
