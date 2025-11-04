@@ -92,31 +92,29 @@ export default function BeverageCalculator() {
     const { dateStr, timeStr } = formatDateTime();
 
     let receipt = '';
-    receipt += '================================\n';
-    receipt += 'JOY LOVE CONSUMER GOODS TRADING\n';
+    receipt += '   JOY LOVE CONSUMER GOODS TRADING\n';
     receipt += '   Non-VAT Reg. TIN: 492517470\n';
     receipt += '   09942954786-09917422036\n';
-    receipt += ' P8, Poblacion, Libona, Buk.\n';
-    receipt += '================================\n';
-    receipt += `Date: ${dateStr}\n`;
-    receipt += `Time: ${timeStr}\n`;
-    receipt += '================================\n\n';
+    receipt += '   P8, Poblacion, Libona, Buk.\n';
+    receipt += '------------------------------\n';
+    receipt += `Date: ${dateStr}   Time: ${timeStr}\n`;
+    receipt += '------------------------------\n\n';
 
-    receipt += 'ITEM         QTY   PRICE    TOTAL\n';
-    receipt += '--------------------------------\n';
+    receipt += 'Item     Qty Price   Total\n';
+    receipt += '------------------------------\n';
 
     items.forEach((item) => {
-      const name = (item.name || 'Unnamed').substring(0, 12).padEnd(12);
+      const name = (item.name || 'Unnamed').padEnd(8).slice(0, 8);
       const qty = item.cases.toString().padStart(3);
-      const price = formatCurrency(item.price).padStart(6);
-      const total = formatCurrency(item.total).padStart(10);
+      const price = formatCurrency(item.price).padStart(5);
+      const total = formatCurrency(item.total).padStart(7);
       receipt += `${name} ${qty} ${price} ${total}\n`;
     });
 
-    receipt += '================================\n';
-    receipt += `GRAND TOTAL: ${formatCurrency(grandTotal).padStart(18)}\n`;
-    receipt += '================================\n\n';
-    receipt += '   Thank you for your purchase!\n';
+    receipt += '------------------------------\n';
+    receipt += `GRAND TOTAL:${''.padStart(7)}${formatCurrency(grandTotal)}\n`;
+    receipt += '------------------------------\n\n';
+    receipt += '  Thank you for your purchase!\n';
     receipt += '     Please come again!\n';
     receipt += '\n\n\n\n';
 
